@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de la Compra</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Cambiar alineación a flex-start */
+            height: 100vh;
+            margin: 0;
+            padding-top: 20px; /* Espacio de encabezado */
+        }
+        .carrito-container, .stock-container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            margin: 10px; /* Espaciado entre contenedores */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            text-decoration: underline; /* Subrayado en el título */
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .product-list, .stock-list {
+            margin-top: 20px;
+        }
+        .product-item, .stock-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .product-item:last-child, .stock-item:last-child {
+            border-bottom: none;
+        }
+        .remove-btn {
+            color: red;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="carrito-container">
+    <h1>Carrito de Compras</h1>
+    <form id="formProducto">
+        <input type="text" id="nombreProducto" placeholder="Nombre del producto" required>
+        <input type="number" id="cantidadProducto" placeholder="Cantidad" required>
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+    <div class="product-list" id="listaProductos">
+        <!-- Aquí se mostrarán los productos del carrito -->
+    </div>
+
+    <button id="btnLimpiar">Limpiar Carrito</button>
+    <span id="totalAPagar">Total a pagar: 0.00 €</span>
+</div>
+
+<div class="stock-container">
+    <h1>Productos Disponibles</h1>
+    <div class="stock-list" id="listaStock">
+        <!-- Aquí se mostrarán los productos del stock -->
+    </div>
+</div>
+
+<script>
+    const formProducto = document.getElementById('formProducto');
+    const listaProductos = document.getElementById('listaProductos');
+    const btnLimpiar = document.getElementById('btnLimpiar');
+    const listaStock = document.getElementById('listaStock');
+
+    // Cargar carrito y stock al inicio
+    cargarCarrito();
+    cargarStock();
+
+    formProducto.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const nombre = document.getElementById('nombreProducto').value;
+        const cantidad = document.getElementById('cantidadProducto').value;
+
+        const response = await fetch('Carrito.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'add',
+                nombre: nombre,
+                cantidad: cantidad,
+            }),
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            cargarCarrito(); // Recargar productos en el carrito
+            cargarStock(); // Recargar stock actualizado
+            alert('Producto agregado exitosamente.');
+        } else {
+            alert(result.message || 'Error al agregar el producto.');
+        }
+    });
+
+    async function cargarCarrito() {
+        const response = await fetch('Carrito.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'load_cart',
+            }),
+        });
+        const productos = await response.json();
+
+        listaProductos.innerHTML = ''; // Limpiar la lista existente
+        let total = 0; // Inicializa el total
+
+        if (productos.length === 0) {
+            listaProductos.innerHTML = '<p>No hay productos en el carrito.</p>';
+        } else {
+            productos.forEach(producto => {
+                const item = document.createElement('div');
+                item.classList.add('product-item');
+                const precioTotal = (producto.precio_unidad * producto.cantidad).toFixed(2);
+                total += parseFloat(precioTotal); // Acumula el precio total
+                item.innerHTML = `
+                    <span>${producto.nombre} (${producto.cantidad})</span>
+                    <span>${precioTotal} €</span>
+                    <span class="remove-btn" onclick="eliminarProducto('${producto.productID}')">Eliminar</span>
+                `;
+                listaProductos.appendChild(item);
+            });
+        }
+
+        // Actualiza el total a pagar
+        document.getElementById('totalAPagar').textContent = `Total a pagar: ${total.toFixed(2)} €`;
+    }
+
+    async function cargarStock() {
+        const response = await fetch('Carrito.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'load_stock',
+            }),
+        });
+        const productos = await response.json();
+
+        listaStock.innerHTML = ''; // Limpiar la lista existente
+
+        if (productos.length === 0) {
+            listaStock.innerHTML = '<p>No hay productos disponibles.</p>';
+        } else {
+            productos.forEach(producto => {
+                const item = document.createElement('div');
+                item.classList.add('stock-item');
+                item.innerHTML = `
+                    <span>${producto.nombre}</span>
+                    <span>${producto.precio_unidad} €</span>
+                    <span style="color: ${producto.cantidad === 0 ? 'red' : 'black'};">${producto.cantidad}</span>
+                `;
+                listaStock.appendChild(item);
+            });
+        }
+    }
+
+    async function eliminarProducto(productID) {
+        const response = await fetch('Carrito.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'remove',
+                productID: productID,
+            }),
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            cargarCarrito(); // Recargar productos en el carrito
+            cargarStock(); // Recargar stock actualizado
+            alert('Producto eliminado exitosamente.');
+        } else {
+            alert(result.message || 'Error al eliminar el producto.');
+        }
+    }
+
+    btnLimpiar.addEventListener('click', async () => {
+        const response = await fetch('Carrito.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'clear_cart',
+            }),
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            cargarCarrito(); // Recargar productos en el carrito
+            cargarStock(); // Recargar stock actualizado
+            alert('Carrito limpiado exitosamente.');
+        }
+    });
+</script>
+
+</body>
+</html>

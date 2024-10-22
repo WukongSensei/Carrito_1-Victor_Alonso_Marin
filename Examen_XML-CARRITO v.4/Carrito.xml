@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<productos>
+    <producto>
+        <productID>6705567703787</productID>
+        <nombre>Manzanas</nombre>
+        <cantidad>2</cantidad>
+        <precio_unidad>2</precio_unidad>
+    </producto>
+    <producto>
+        <productID>6705567bbf1d5</productID>
+        <nombre>Peras</nombre>
+        <cantidad>2</cantidad>
+        <precio_unidad>1.5</precio_unidad>
+    </producto>
+    <producto>
+        <productID>6705567ff0d2b</productID>
+        <nombre>Peras</nombre>
+        <cantidad>2</cantidad>
+        <precio_unidad>1.5</precio_unidad>
+    </producto>
+</productos>

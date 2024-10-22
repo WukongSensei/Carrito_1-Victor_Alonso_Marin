@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<productos>
+    <producto>
+        <productID>prod001</productID>
+        <nombre>Peras</nombre>
+        <cantidad>3</cantidad>
+        <precio_unidad>1.50</precio_unidad>
+    </producto>
+    <producto>
+        <productID>prod002</productID>
+        <nombre>Manzanas</nombre>
+        <cantidad>8</cantidad>
+        <precio_unidad>2.00</precio_unidad>
+    </producto>
+    <producto>
+        <productID>prod003</productID>
+        <nombre>Plátanos</nombre>
+        <cantidad>5</cantidad>
+        <precio_unidad>1.20</precio_unidad>
+    </producto>
+    <producto>
+        <productID>prod004</productID>
+        <nombre>Naranjas</nombre>
+        <cantidad>12</cantidad>
+        <precio_unidad>0.80</precio_unidad>
+    </producto>
+    <producto>
+        <productID>prod005</productID>
+        <nombre>Kiwi</nombre>
+        <cantidad>8</cantidad>
+        <precio_unidad>1.70</precio_unidad>
+    </producto>
+</productos>
